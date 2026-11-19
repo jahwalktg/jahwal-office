@@ -67,7 +67,7 @@ table.list tr.skip td{opacity:.5}
   <footer><div data-jt-contact>도구 문의·의견: jahwalktg@gmail.com</div></footer>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="../core.js?v=4"></script>
+<script src="../core.js?v=5"></script>
 <script>
 (function () {
   var O = Office, $ = O.$, esc = O.esc;
@@ -197,7 +197,7 @@ table.list tr.skip td{opacity:.5}
       var t = p.addSlide(); t.background = { color: 'F4F7FB' };
       t.addText('2026 사업 보고 (예시)', { x: .8, y: 2.4, w: 11.7, h: 1.2, fontSize: 40, bold: true, color: '1F3B63', align: 'center', fontFace: '맑은 고딕' });
       t.addText('사진이 무거워 메일로 못 보내는 발표 — 줄이기 시험용', { x: .8, y: 3.7, w: 11.7, h: .6, fontSize: 18, color: '555555', align: 'center', fontFace: '맑은 고딕' });
-      [['봄 나들이', 200, 'image/jpeg'], ['사업단 작업 모습', 20, 'image/jpeg'], ['연말 행사', 280, 'image/jpeg'], ['단체 사진 (PNG로 붙여 넣은 것)', 140, 'image/png']].forEach(function (x) {
+      [['봄 나들이', 200, 'image/jpeg'], ['프로그램 활동 모습', 20, 'image/jpeg'], ['연말 행사', 280, 'image/jpeg'], ['단체 사진 (PNG로 붙여 넣은 것)', 140, 'image/png']].forEach(function (x) {
         var s = p.addSlide(); s.addText(x[0], { x: .5, y: .25, w: 12.3, h: .7, fontSize: 26, bold: true, color: '1F3B63', fontFace: '맑은 고딕' });
         var png = x[2] === 'image/png', w = png ? 2400 : 4000, h = png ? 1800 : 3000;
         s.addImage({ data: heavyImg(w, h, x[1], x[2], .97), x: 1.67, y: 1.1, w: 10, h: 6 });

@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>엑셀 합치기·나누기 — 뚝딱 한엑피 공방</title>
-<meta name="description" content="사업단별 엑셀 파일 여러 개를 한 표로 합치고, 한 표를 사업단별 시트·파일로 나눕니다. 제목 줄·머리글이 조금 달라도 맞춰서. 설치·로그인 없음.">
+<meta name="description" content="부서별 엑셀 파일 여러 개를 한 표로 합치고, 한 표를 부서별 시트·파일로 나눕니다. 제목 줄·머리글이 조금 달라도 맞춰서. 설치·로그인 없음.">
 <link rel="icon" type="image/png" href="../favicon.png">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <link rel="stylesheet" href="../style.css?v=2">
@@ -36,7 +36,7 @@ table.list tr.off td{opacity:.5}
 <body>
 <div class="wrap">
   <header id="top"></header>
-  <p class="sub">여러 엑셀 파일을 <b>한 표로 합치거나</b>, 한 표를 사업단·달 같은 칸 기준으로 <b>시트·파일로 나눕니다</b>. 파일마다 맨 위 제목 줄이 있거나 머리글 순서·이름이 조금 달라도 맞춰 줍니다.</p>
+  <p class="sub">여러 엑셀 파일을 <b>한 표로 합치거나</b>, 한 표를 부서·달 같은 칸 기준으로 <b>시트·파일로 나눕니다</b>. 파일마다 맨 위 제목 줄이 있거나 머리글 순서·이름이 조금 달라도 맞춰 줍니다.</p>
   <div class="tabs" role="tablist">
     <button type="button" id="tabM" class="on" role="tab"><b>🧩 합치기</b><span>파일 여러 개 → 한 표</span></button>
     <button type="button" id="tabS" role="tab"><b>✂️ 나누기</b><span>한 표 → 값마다 시트·파일</span></button>
@@ -120,7 +120,7 @@ table.list tr.off td{opacity:.5}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="../lib/hwpx.js?v=1"></script>
 <script src="../lib/xlsxw.js?v=3"></script>
-<script src="../core.js?v=4"></script>
+<script src="../core.js?v=5"></script>
 <script>
 (function () {
   var O = Office, $ = O.$, esc = O.esc;
@@ -349,13 +349,13 @@ table.list tr.off td{opacity:.5}
   }
   var NAMES = ['김하늘', '이바다', '박구름', '최별', '정나무', '한들꽃', '오솔길', '윤햇살', '서은빛', '장마루'];
   $('sampleM').onclick = function () {
-    var a = sampleFile('가나 사업단 10월.xlsx', [['가나 사업단 10월 참여자 명단(예시)'], [], ['연번', '성명', '생년월일', '참여일수', '급여'], [1, NAMES[0], '1970-03-02', 21, 1534000], [2, NAMES[1], '1981-11-20', 19, 1388000], [3, NAMES[2], '1965-07-15', 22, 1607000], ['합계', '', '', 62, 4529000]]);
-    var b = sampleFile('다라 사업단 10월.xlsx', [['연번', '이름', '참여일수', '급여', '비고'], [1, NAMES[3], 20, 1461000, '반장'], [2, NAMES[4], 18, 1315000, ''], [3, NAMES[5], 21, 1534000, '신규']]);
-    var c = sampleFile('마바 사업단 10월.xlsx', [['마바 사업단'], ['연번', '성 명', '생년월일', '참여 일수', '급여'], [1, NAMES[6], '1990-01-09', 22, 1607000], [2, NAMES[7], '1958-05-30', 17, 1242000]]);
+    var a = sampleFile('가나팀 10월.xlsx', [['가나팀 10월 직원 명단(예시)'], [], ['연번', '성명', '생년월일', '근무일수', '급여'], [1, NAMES[0], '1970-03-02', 21, 1534000], [2, NAMES[1], '1981-11-20', 19, 1388000], [3, NAMES[2], '1965-07-15', 22, 1607000], ['합계', '', '', 62, 4529000]]);
+    var b = sampleFile('다라팀 10월.xlsx', [['연번', '이름', '근무일수', '급여', '비고'], [1, NAMES[3], 20, 1461000, '팀장'], [2, NAMES[4], 18, 1315000, ''], [3, NAMES[5], 21, 1534000, '신규']]);
+    var c = sampleFile('마바팀 10월.xlsx', [['마바팀'], ['연번', '성 명', '생년월일', '근무 일수', '급여'], [1, NAMES[6], '1990-01-09', 22, 1607000], [2, NAMES[7], '1958-05-30', 17, 1242000]]);
     addBooks([a, b, c]);
   };
   $('sampleS').onclick = function () {
-    var rows = [['2026년 10월 참여자 급여 현황(예시)'], [], ['연번', '사업단', '성명', '참여일수', '급여']], units = ['가나 사업단', '다라 사업단', '마바 사업단'];
+    var rows = [['2026년 10월 직원 급여 현황(예시)'], [], ['연번', '부서', '성명', '근무일수', '급여']], units = ['가나팀', '다라팀', '마바팀'];
     for (var i = 0; i < 12; i++) rows.push([i + 1, units[i % 3], NAMES[i % 10] + (i >= 10 ? '2' : ''), 15 + (i * 7) % 8, 1100000 + (i * 37000) % 500000]);
     loadSplit([sampleFile('10월 급여 현황(예시).xlsx', rows)]);
   };

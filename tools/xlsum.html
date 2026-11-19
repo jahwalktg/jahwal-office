@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>피벗 없이 집계표 — 뚝딱 한엑피 공방</title>
-<meta name="description" content="「사업단별·월별 합계」처럼 기준 칸과 더할 칸만 고르면 집계표가 나옵니다. 피벗 테이블 몰라도 됩니다. 엑셀·한글 표로 받기. 설치·로그인 없음.">
+<meta name="description" content="「부서별·월별 합계」처럼 기준 칸과 더할 칸만 고르면 집계표가 나옵니다. 피벗 테이블 몰라도 됩니다. 엑셀·한글 표로 받기. 설치·로그인 없음.">
 <link rel="icon" type="image/png" href="../favicon.png">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
 <link rel="stylesheet" href="../style.css?v=2">
@@ -27,7 +27,7 @@
 <body>
 <div class="wrap">
   <header id="top"></header>
-  <p class="sub">피벗 테이블을 몰라도 됩니다. <b>무엇별로</b>(사업단·월…) <b>무엇을</b>(급여·인원…) <b>어떻게</b>(합계·개수·평균) 셀지만 고르면 집계표가 나오고, 그대로 엑셀이나 한글 표로 받습니다.</p>
+  <p class="sub">피벗 테이블을 몰라도 됩니다. <b>무엇별로</b>(부서·월…) <b>무엇을</b>(급여·인원…) <b>어떻게</b>(합계·개수·평균) 셀지만 고르면 집계표가 나오고, 그대로 엑셀이나 한글 표로 받습니다.</p>
   <section class="panel" style="margin-top:12px">
     <div class="step"><span class="n">1</span><h2>표 넣기</h2></div>
     <div id="pick"></div>
@@ -53,7 +53,7 @@
       <div class="step"><span class="n">3</span><h2>집계표 · 받기</h2><span class="hint" id="sum"></span></div>
       <div class="pv" id="pv"></div>
       <div class="out">
-        <label class="f" style="min-width:220px;flex:1">표 제목<input type="text" id="title" placeholder="예: 2026년 사업단별 월별 급여 합계"></label>
+        <label class="f" style="min-width:220px;flex:1">표 제목<input type="text" id="title" placeholder="예: 2026년 부서별 월별 급여 합계"></label>
         <label class="f" style="width:130px">단위 글<input type="text" id="unit" placeholder="(단위: 원)"></label>
       </div>
       <div class="out">
@@ -70,7 +70,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="../lib/hwpx.js?v=1"></script>
 <script src="../lib/xlsxw.js?v=3"></script>
-<script src="../core.js?v=4"></script>
+<script src="../core.js?v=5"></script>
 <script src="../lib/xlkit.js?v=1"></script>
 <script>
 (function () {
@@ -205,7 +205,7 @@
     O.download(K.fileSafe(title()) + '.xlsx', Xlsxw.book(sh)); O.toast('엑셀을 내려받았습니다.');
   };
   function sample() {
-    var units = ['가나 사업단', '다라 사업단', '마바 사업단', '사아 사업단'], rows = [['2026년 사업단 급여 지급 내역(예시)'], [], ['지급일', '사업단', '성명', '보장구분', '참여일수', '급여']], kinds = ['조건부', '차상위', '자활특례'];
+    var units = ['가나팀', '다라팀', '마바팀', '사아팀'], rows = [['2026년 급여 지급 내역(예시)'], [], ['지급일', '부서', '성명', '고용형태', '근무일수', '급여']], kinds = ['정규직', '계약직', '시간제'];
     var NM = ['김하늘', '이바다', '박구름', '최별', '정나무', '한들꽃', '오솔길', '윤햇살', '서은빛', '장마루', '문초록', '배노을'];
     for (var m = 7; m <= 10; m++) for (var i = 0; i < 12; i++) { if ((i + m) % 7 === 0) continue; rows.push([m === 10 ? '2026-10-31' : '2026-' + String(m).padStart(2, '0') + '-' + (m === 9 ? '30' : '31'), units[i % 4], NM[i], kinds[i % 3], 15 + (i * 5 + m) % 8, 1100000 + ((i * 37 + m * 11) % 50) * 10000]); }
     return K.aoaFile('급여 지급 내역(예시).xlsx', rows, function (ws) { Object.keys(ws).forEach(function (a) { if (/^F\d+$/.test(a) && typeof ws[a].v === 'number') ws[a].z = '#,##0'; }); });

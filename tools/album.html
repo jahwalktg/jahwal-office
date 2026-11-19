@@ -52,8 +52,8 @@
         <div class="step"><span class="n">2</span><h2>앨범 모양</h2></div>
         <div class="opts">
           <div class="w2"><div class="hint" style="margin-bottom:4px">한 장에 사진</div><div class="lays" id="lays"></div></div>
-          <label class="f w2">앨범 제목 (첫 장)<input type="text" id="title" placeholder="예: 2026 자활 한마당 사진"></label>
-          <label class="f w2">제목 아래 한 줄<input type="text" id="sub" placeholder="예: 2026. 11. 3. · 강남구민회관 · ○○지역자활센터"></label>
+          <label class="f w2">앨범 제목 (첫 장)<input type="text" id="title" placeholder="예: 2026 가을 한마당 사진"></label>
+          <label class="f w2">제목 아래 한 줄<input type="text" id="sub" placeholder="예: 2026. 11. 3. · 강남구민회관 · ○○기관"></label>
           <label class="f">사진 순서<select id="order"><option value="time">찍은 시각 순</option><option value="name">파일 이름 순</option><option value="added">넣은 순서</option></select></label>
           <label class="f">사진 아래 글<select id="cap"><option value="">없음</option><option value="name">파일 이름</option><option value="time">찍은 날짜·시각</option></select></label>
           <label class="f">사진 맞추기<select id="fit"><option value="cover">칸에 꽉 채우기 (가장자리 잘림)</option><option value="contain">사진 전체 보이기 (여백)</option></select></label>
@@ -82,7 +82,7 @@
   <footer><div data-jt-contact>도구 문의·의견: jahwalktg@gmail.com</div></footer>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
-<script src="../core.js?v=4"></script>
+<script src="../core.js?v=5"></script>
 <script>
 (function () {
   var O = Office, $ = O.$, esc = O.esc;
@@ -300,20 +300,20 @@
   $('sample').onclick = function () {
     var SETS = [['1부 개회식', ['#9AD1F5', '#E8F6FF', '#7BBF6A'], ['개회 선언', '내빈 인사', '단체 사진']],
                 ['2부 체험 부스', ['#FFD6A5', '#FFF4E0', '#E0A458'], ['비누 만들기', '커피 시음', '네일 체험', '사진 부스']],
-                ['3부 시상식', ['#C8B6FF', '#F1EAFF', '#8E7DBE'], ['우수 사업단', '모범 참여자']]];
+                ['3부 시상식', ['#C8B6FF', '#F1EAFF', '#8E7DBE'], ['우수 프로그램', '감사패 전달']]];
     var base = new Date(2026, 9, 21, 10, 0).getTime(), jobs = [], k = 0;
     SETS.forEach(function (st) {
       st[2].forEach(function (lb) {
         var kk = k++, port = kk === 4;
         jobs.push(sampleShot(port ? 900 : 1600, 1200, st[1], lb, kk).then(function (b) {
           var f = new File([b], '예시_' + String(kk + 1).padStart(2, '0') + '_' + lb + '.jpg', { type: 'image/jpeg', lastModified: base + kk * 1500000 });
-          f.relPath = '2026 자활 한마당(예시)/' + st[0] + '/' + f.name; return f;
+          f.relPath = '2026 가을 한마당(예시)/' + st[0] + '/' + f.name; return f;
         }));
       });
     });
     Promise.all(jobs).then(function (fs) {
-      if (!$('title').value) $('title').value = '2026 자활 한마당 사진 (예시)';
-      if (!$('sub').value) $('sub').value = '2026. 10. 21. · ○○구민회관 · ○○지역자활센터';
+      if (!$('title').value) $('title').value = '2026 가을 한마당 사진 (예시)';
+      if (!$('sub').value) $('sub').value = '2026. 10. 21. · ○○구민회관 · ○○기관';
       addFiles(fs);
     });
   };

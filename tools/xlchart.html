@@ -34,7 +34,7 @@
   <section class="panel" style="margin-top:12px">
     <div class="step"><span class="n">1</span><h2>표 넣기</h2></div>
     <div id="pick"></div>
-    <p class="hint" style="margin:6px 0 0">첫 칸은 항목(사업단·월…), 나머지 칸은 숫자인 표가 가장 잘 됩니다. 예: <code>월 | 매출 | 지출</code></p>
+    <p class="hint" style="margin:6px 0 0">첫 칸은 항목(부서·월…), 나머지 칸은 숫자인 표가 가장 잘 됩니다. 예: <code>월 | 매출 | 지출</code></p>
   </section>
   <div class="lay" id="work" hidden>
     <section class="panel">
@@ -44,7 +44,7 @@
         <label class="f w2">항목 칸 (가로축·조각 이름)<select id="cat"></select></label>
         <div class="w2"><div class="hint" style="margin-bottom:2px">숫자 칸 (막대·선)</div><div class="sers" id="sers"></div></div>
         <label class="chk w2"><input type="checkbox" id="swap"> 줄과 칸 바꾸기 (항목을 가로로 늘어놓은 표일 때)</label>
-        <label class="f w2">차트 제목<input type="text" id="title" placeholder="예: 사업단별 10월 매출"></label>
+        <label class="f w2">차트 제목<input type="text" id="title" placeholder="예: 부서별 10월 매출"></label>
         <label class="f">단위 (축 이름)<input type="text" id="unit" placeholder="예: 원, 명"></label>
         <label class="f">범례<select id="legend"><option value="b">아래</option><option value="r">오른쪽</option><option value="t">위</option><option value="">없음</option></select></label>
         <div class="w2"><div class="hint" style="margin-bottom:2px">색</div><div class="pals" id="pals"></div></div>
@@ -70,7 +70,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
-<script src="../core.js?v=4"></script>
+<script src="../core.js?v=5"></script>
 <script src="../lib/xlkit.js?v=1"></script>
 <script>
 (function () {
@@ -201,7 +201,7 @@
     p.write({ outputType: 'blob' }).then(function (b) { O.download(K.fileSafe(title() || '차트') + '.pptx', b); O.toast('PPT를 내려받았습니다.'); });
   };
   function sample() {
-    return K.aoaFile('사업단 매출(예시).xlsx', [['2026년 하반기 사업단 매출(예시)'], ['(단위: 천 원)'], ['사업단', '7월', '8월', '9월', '10월'], ['가나 사업단', 12480, 13120, 12900, 14210], ['다라 사업단', 8215, 7990, 8630, 9120], ['마바 사업단', 5600, 6050, 5880, 6410], ['사아 사업단', 31402, 32115, 30980, 33760], ['합계', 57697, 59275, 58390, 63500]]);
+    return K.aoaFile('팀별 실적(예시).xlsx', [['2026년 하반기 팀별 실적(예시)'], ['(단위: 천 원)'], ['부서', '7월', '8월', '9월', '10월'], ['가나팀', 12480, 13120, 12900, 14210], ['다라팀', 8215, 7990, 8630, 9120], ['마바팀', 5600, 6050, 5880, 6410], ['사아팀', 31402, 32115, 30980, 33760], ['합계', 57697, 59275, 58390, 63500]]);
   }
   window._chart = { data: data, draw: draw, setType: function (t) { $('types').querySelector('[data-t="' + t + '"]').click(); } };
 })();
