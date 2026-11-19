@@ -40,6 +40,12 @@ label.chk{display:inline-flex;align-items:center;gap:6px;font-size:.9rem}
 /* 머리 */
 .top{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px}
 .top .home{font-weight:800;text-decoration:none;color:var(--text)}
+.top .back{display:inline-flex;align-items:center;min-height:40px;padding:7px 16px;border-radius:99px;background:var(--blue);color:#fff;font-weight:800;text-decoration:none;font-size:.95rem;box-shadow:0 2px 6px rgba(0,0,0,.15)}
+.top .back:hover{filter:brightness(1.1)}
+.top .jt-clear.big{margin-left:auto;border-color:#D9534F;color:#C9302C;font-weight:800}
+.jt-clear{border-color:#E8A3A1;color:#C9302C}
+.jt-clear:hover{border-color:#D9534F;background:#FDECEC}
+@media (max-width:560px){.top .back{width:100%;justify-content:center}}
 .logo{display:inline-flex;gap:3px;vertical-align:middle}
 .logo i{font-style:normal;width:24px;height:24px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:.8rem;font-weight:800}
 .logo .h{background:#1F5FBF}.logo .x{background:#1D7A46}.logo .p{background:#C2491D}
