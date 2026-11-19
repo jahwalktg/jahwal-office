@@ -63,6 +63,10 @@ textarea.paste{width:100%;min-height:90px;border:1.5px dashed var(--line);border
       <label class="chk"><input type="checkbox" id="optBirth" checked> 생년월일로 보이는 날짜 (1920~2015년)</label>
       <label class="chk"><input type="checkbox" id="optAddr" checked> 주소의 번지·동·호수 (도로명은 남김)</label>
     </div>
+    <div class="opts" style="margin-top:10px">
+      <label class="f" style="min-width:260px">표 모양<select id="tblMode"><option value="md">보기 쉬운 표 (합친 칸은 풀어서) — 권장</option><option value="html">HTML 표 그대로 (합친 칸 모양이 정확)</option></select></label>
+      <span class="hint">합친 칸이 있는 표는 원래 HTML(&lt;table&gt;) 글자로 나옵니다. AI는 둘 다 잘 읽습니다.</span>
+    </div>
   </section>
 
   <section class="panel" id="p3" hidden>
@@ -184,8 +188,32 @@ textarea.paste{width:100%;min-height:90px;border:1.5px dashed var(--line);border
   $('addName').addEventListener('keydown', function (e) { if (e.key === 'Enter') { e.preventDefault(); $('addBtn').click(); } });
 
   /* ---------- 가리기 ---------- */
+  /* HTML 표(<table>) → 보기 쉬운 | 칸 | 표. 합친 칸은 첫 칸에 글, 나머지 칸은 비움 */
+  function htmlTablesToMd(md) {
+    return md.replace(/<table[\s\S]*?<\/table>/gi, function (h) {
+      var doc = new DOMParser().parseFromString(h, 'text/html'), tb = doc.querySelector('table'); if (!tb) return h;
+      var grid = [], occ = {};
+      [].forEach.call(tb.rows, function (tr, r) {
+        grid[r] = grid[r] || []; var c = 0;
+        [].forEach.call(tr.cells, function (td) {
+          while (occ[r + ',' + c]) c++;
+          var cs = Math.max(1, +td.colSpan || 1), rs = Math.max(1, +td.rowSpan || 1);
+          td.querySelectorAll('br').forEach(function (b) { b.replaceWith(' '); });
+          var t = td.textContent.replace(/\s+/g, ' ').trim().replace(/\|/g, '/');
+          for (var i = 0; i < rs; i++) for (var j = 0; j < cs; j++) { occ[(r + i) + ',' + (c + j)] = 1; grid[r + i] = grid[r + i] || []; grid[r + i][c + j] = (i || j) ? '' : t; }
+          c += cs;
+        });
+      });
+      var W = grid.reduce(function (a, r) { return Math.max(a, r ? r.length : 0); }, 0); if (!W) return h;
+      var line = function (r) { var a = []; for (var k = 0; k < W; k++) a.push((r && r[k]) || ''); return '| ' + a.join(' | ') + ' |'; };
+      var out = [line(grid[0]), '|' + Array(W + 1).join(' --- |')];
+      for (var r2 = 1; r2 < grid.length; r2++) out.push(line(grid[r2]));
+      return '\n' + out.join('\n') + '\n';
+    });
+  }
   function build() {
-    var src = docs.filter(function (d) { return d.md; }).map(function (d, i, a) { return (a.length > 1 ? '# 문서 ' + (i + 1) + ': ' + d.name.replace(/\.[^.]+$/, '') + '\n\n' : '') + d.md; });
+    var md2 = $('tblMode').value === 'md';
+    var src = docs.filter(function (d) { return d.md; }).map(function (d, i, a) { return (a.length > 1 ? '# 문서 ' + (i + 1) + ': ' + d.name.replace(/\.[^.]+$/, '') + '\n\n' : '') + (md2 ? htmlTablesToMd(d.md) : d.md); });
     if ($('paste').value.trim()) src.push($('paste').value.trim());
     var text = src.join('\n\n---\n\n'), cnt = {};
     if (!text) { $('out').value = ''; return; }
@@ -221,7 +249,7 @@ textarea.paste{width:100%;min-height:90px;border:1.5px dashed var(--line);border
     var n = text.length;
     $('len').textContent = n.toLocaleString() + '자' + (n > 30000 ? ' · 길어서 AI가 한 번에 못 받을 수 있습니다. 필요한 부분만 남겨 주세요.' : '');
   }
-  ['optBirth', 'optAddr', 'nameMode', 'ask'].forEach(function (id) { $(id).addEventListener('change', build); });
+  ['optBirth', 'optAddr', 'nameMode', 'ask', 'tblMode'].forEach(function (id) { $(id).addEventListener('change', build); });
   var pt = 0; $('paste').addEventListener('input', function () { clearTimeout(pt); pt = setTimeout(function () { need().catch(function () { }).then(function () { findNames(); show(); }); }, 300); });
 
   /* ---------- 복사·받기 ---------- */
