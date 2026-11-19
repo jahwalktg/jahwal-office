@@ -44,6 +44,7 @@
           <div class="hint" style="margin-bottom:8px">JPG·PNG·WEBP · 폴더 안에 폴더가 있으면 폴더마다 간지(구분 장)를 넣을 수 있습니다</div>
           <label class="btn"><input type="file" id="file" accept="image/jpeg,image/png,image/webp" multiple hidden>사진 고르기</label>
           <label class="btn"><input type="file" id="dir" webkitdirectory hidden>폴더 고르기</label>
+          <button type="button" class="btn" id="sample">예시 사진으로 해 보기</button>
         </div>
         <p class="hint" id="cnt" style="margin:8px 0 0">아이폰 HEIC 사진은 브라우저가 못 읽습니다 — 휴대폰 설정에서 「호환성 우선」으로 찍거나 JPG로 바꿔 넣어 주세요.</p>
       </section>
@@ -278,6 +279,44 @@
     return '<button type="button" data-n="' + n + '"' + (n === per ? ' class="on"' : '') + '><svg viewBox="0 0 46 26"><rect x=".5" y=".5" width="45" height="25" rx="2" fill="none" stroke="currentColor"/>' + r + '</svg>' + n + '장</button>';
   }).join('');
   $('lays').querySelectorAll('button').forEach(function (b) { b.onclick = function () { per = +b.dataset.n; $('lays').querySelectorAll('button').forEach(function (x) { x.classList.toggle('on', x === b); }); preview(); }; });
+  /* ---------- 예시 사진 (가상 그림, 폴더 3개 9장) ---------- */
+  function sampleShot(w, h, pal, label, k) {
+    var cv = document.createElement('canvas'); cv.width = w; cv.height = h; var c = cv.getContext('2d');
+    var g = c.createLinearGradient(0, 0, 0, h); g.addColorStop(0, pal[0]); g.addColorStop(1, pal[1]); c.fillStyle = g; c.fillRect(0, 0, w, h);
+    c.fillStyle = 'rgba(255,255,255,.55)'; c.beginPath(); c.arc(w * (.18 + k * .07), h * .2, h * .08, 0, 7); c.fill();
+    c.fillStyle = pal[2]; c.beginPath(); c.moveTo(0, h * .72); c.quadraticCurveTo(w * .3, h * (.55 + k * .02), w * .6, h * .7); c.quadraticCurveTo(w * .85, h * .8, w, h * .66); c.lineTo(w, h); c.lineTo(0, h); c.fill();
+    var n = 3 + (k % 4);
+    for (var i = 0; i < n; i++) {
+      var x = w * (.2 + .6 * (i + .5) / n), y = h * .62, r = h * .05;
+      c.fillStyle = ['#F2C14E', '#F78154', '#4D9DE0', '#7CB518', '#E15554', '#9B5DE5'][(i + k) % 6];
+      c.beginPath(); c.ellipse(x, y + r * 2.4, r * 1.1, r * 1.9, 0, 0, 7); c.fill();
+      c.fillStyle = '#F5D6BA'; c.beginPath(); c.arc(x, y, r, 0, 7); c.fill();
+    }
+    c.fillStyle = 'rgba(0,0,0,.45)'; c.fillRect(0, h - h * .11, w, h * .11);
+    c.fillStyle = '#fff'; c.font = '700 ' + Math.round(h * .05) + 'px Pretendard, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.fillText(label + ' (예시 그림)', w / 2, h - h * .055);
+    return new Promise(function (ok) { cv.toBlob(ok, 'image/jpeg', .85); });
+  }
+  $('sample').onclick = function () {
+    var SETS = [['1부 개회식', ['#9AD1F5', '#E8F6FF', '#7BBF6A'], ['개회 선언', '내빈 인사', '단체 사진']],
+                ['2부 체험 부스', ['#FFD6A5', '#FFF4E0', '#E0A458'], ['비누 만들기', '커피 시음', '네일 체험', '사진 부스']],
+                ['3부 시상식', ['#C8B6FF', '#F1EAFF', '#8E7DBE'], ['우수 사업단', '모범 참여자']]];
+    var base = new Date(2026, 9, 21, 10, 0).getTime(), jobs = [], k = 0;
+    SETS.forEach(function (st) {
+      st[2].forEach(function (lb) {
+        var kk = k++, port = kk === 4;
+        jobs.push(sampleShot(port ? 900 : 1600, 1200, st[1], lb, kk).then(function (b) {
+          var f = new File([b], '예시_' + String(kk + 1).padStart(2, '0') + '_' + lb + '.jpg', { type: 'image/jpeg', lastModified: base + kk * 1500000 });
+          f.relPath = '2026 자활 한마당(예시)/' + st[0] + '/' + f.name; return f;
+        }));
+      });
+    });
+    Promise.all(jobs).then(function (fs) {
+      if (!$('title').value) $('title').value = '2026 자활 한마당 사진 (예시)';
+      if (!$('sub').value) $('sub').value = '2026. 10. 21. · ○○구민회관 · ○○지역자활센터';
+      addFiles(fs);
+    });
+  };
   O.bindDrop($('drop'), $('file'), addFiles);
   $('dir').addEventListener('change', function () { addFiles([].slice.call(this.files)); this.value = ''; });
   ['title', 'sub'].forEach(function (id) { $(id).addEventListener('input', preview); });

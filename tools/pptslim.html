@@ -35,6 +35,7 @@ table.list tr.skip td{opacity:.5}
       <b>PPT 파일(pptx)을 여기에 끌어다 놓기</b>
       <div class="hint" style="margin-bottom:8px">docx·xlsx·hwpx도 됩니다 · 옛 형식 ppt·hwp는 프로그램에서 「다른 이름으로 저장 → pptx·hwpx」 뒤에 넣어 주세요</div>
       <label class="btn"><input type="file" id="file" accept=".pptx,.ppsx,.potx,.docx,.xlsx,.hwpx" hidden>파일 고르기</label>
+      <button type="button" class="btn" id="sample">예시 PPT로 해 보기</button>
     </div>
     <p class="info hint" id="info" style="margin:8px 0 0"></p>
   </section>
@@ -171,6 +172,42 @@ table.list tr.skip td{opacity:.5}
     });
   }
   $('dl').onclick = function () { if (!outBlob) return; var n = file.name.replace(/(\.[^.]+)$/, '_줄임$1'); O.download(n, outBlob, { pptx: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' }[ext(n)]); };
+  /* ---------- 예시 PPT: 원본 크기 가상 사진 4장(JPG 3 + 투명 없는 PNG 1)을 넣은 무거운 발표 ---------- */
+  function heavyImg(w, h, hue, type, q) {
+    var cv = document.createElement('canvas'); cv.width = w; cv.height = h; var c = cv.getContext('2d');
+    var g = c.createLinearGradient(0, 0, w, h); g.addColorStop(0, 'hsl(' + hue + ',60%,72%)'); g.addColorStop(1, 'hsl(' + (hue + 40) + ',55%,40%)'); c.fillStyle = g; c.fillRect(0, 0, w, h);
+    for (var i = 0; i < 40; i++) { c.fillStyle = 'hsla(' + (hue + i * 9) + ',70%,' + (40 + i % 30) + '%,.35)'; c.beginPath(); c.arc((i * 997) % w, (i * 613) % h, h * (.04 + (i % 7) * .02), 0, 7); c.fill(); }
+    var d = c.getImageData(0, 0, w, h), a = d.data, s = 12345;
+    for (var j = 0; j < a.length; j += 4) { s = (s * 1103515245 + 12345) & 0x7fffffff; var v = (s >> 16) % 36 - 18; a[j] += v; a[j + 1] += v; a[j + 2] += v; }
+    c.putImageData(d, 0, 0);
+    c.fillStyle = 'rgba(0,0,0,.4)'; c.fillRect(0, h * .86, w, h * .14); c.fillStyle = '#fff'; c.font = '700 ' + Math.round(h * .06) + 'px Pretendard, sans-serif'; c.textAlign = 'center'; c.textBaseline = 'middle';
+    c.fillText('휴대폰 원본 크기 사진 ' + w + '×' + h + ' (예시 그림)', w / 2, h * .93);
+    return cv.toDataURL(type, q);
+  }
+  function needPptx() {
+    return window.PptxGenJS ? Promise.resolve() : new Promise(function (ok, no) {
+      var sc = document.createElement('script'); sc.src = 'https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js';
+      sc.onload = ok; sc.onerror = function () { no(new Error('net')); }; document.head.appendChild(sc);
+    });
+  }
+  $('sample').onclick = function () {
+    var btn = this; btn.disabled = true; $('info').textContent = '예시 PPT 만드는 중… (원본 크기 사진이라 몇 초 걸립니다)';
+    needPptx().then(function () {
+      var p = new PptxGenJS(); p.layout = 'LAYOUT_WIDE';
+      var t = p.addSlide(); t.background = { color: 'F4F7FB' };
+      t.addText('2026 사업 보고 (예시)', { x: .8, y: 2.4, w: 11.7, h: 1.2, fontSize: 40, bold: true, color: '1F3B63', align: 'center', fontFace: '맑은 고딕' });
+      t.addText('사진이 무거워 메일로 못 보내는 발표 — 줄이기 시험용', { x: .8, y: 3.7, w: 11.7, h: .6, fontSize: 18, color: '555555', align: 'center', fontFace: '맑은 고딕' });
+      [['봄 나들이', 200, 'image/jpeg'], ['사업단 작업 모습', 20, 'image/jpeg'], ['연말 행사', 280, 'image/jpeg'], ['단체 사진 (PNG로 붙여 넣은 것)', 140, 'image/png']].forEach(function (x) {
+        var s = p.addSlide(); s.addText(x[0], { x: .5, y: .25, w: 12.3, h: .7, fontSize: 26, bold: true, color: '1F3B63', fontFace: '맑은 고딕' });
+        var png = x[2] === 'image/png', w = png ? 2400 : 4000, h = png ? 1800 : 3000;
+        s.addImage({ data: heavyImg(w, h, x[1], x[2], .97), x: 1.67, y: 1.1, w: 10, h: 6 });
+      });
+      return p.write({ outputType: 'blob' });
+    }).then(function (blob) {
+      btn.disabled = false;
+      load(new File([blob], '무거운 발표(예시).pptx', { type: 'application/vnd.openxmlformats-officedocument.presentationml.presentation' }));
+    }).catch(function () { btn.disabled = false; $('info').textContent = ''; O.toast('예시를 만들지 못했습니다. 인터넷 연결을 확인해 주세요.'); });
+  };
   O.bindDrop($('drop'), $('file'), function (fs) { var f = fs.filter(function (x) { return /\.(pptx|ppsx|potx|docx|xlsx|hwpx)$/i.test(x.name); })[0]; if (!f) { O.toast(fs.some(function (x) { return /\.(ppt|hwp|doc|xls)$/i.test(x.name); }) ? '옛 형식(ppt·hwp·doc·xls)은 프로그램에서 새 형식으로 저장한 뒤 넣어 주세요.' : 'pptx·docx·xlsx·hwpx 파일을 넣어 주세요.'); return; } load(f); });
   window._slim = { load: load };
 })();
