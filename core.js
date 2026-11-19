@@ -6,7 +6,7 @@
     { id: 'xl2hwp', apps: ['xl', 'hwp'], icon: '📋', title: '엑셀 표 → 한글 표', desc: '엑셀에서 복사한 표나 xlsx 파일을 테두리·회색 머리·숫자 쉼표·합계 줄이 갖춰진 한글(hwpx) 표로. 가로·세로 쪽, 칸 폭도 맞춰 줍니다.' },
     { id: 'album', apps: ['ppt'], icon: '🖼️', title: '사진 앨범 PPT', desc: '행사 사진 폴더를 넣으면 찍은 순서대로 한 장에 1~9장씩 배치한 PPT. 사진 크기를 줄여 파일도 가볍게.' },
     { id: 'pptslim', apps: ['ppt'], icon: '🪶', title: 'PPT 용량 줄이기', desc: '메일로 안 보내지는 무거운 PPT — 안에 든 큰 사진만 줄여서 다시 묶습니다. 글·도형·애니메이션은 그대로.' },
-    { id: 'xlmerge', apps: ['xl'], icon: '🧩', title: '엑셀 합치기·나누기', soon: true, desc: '사업단별 파일 여러 개를 한 표로, 한 표를 사업단별 파일로. 머리글이 조금 달라도 맞춰서.' },
+    { id: 'xlmerge', apps: ['xl'], icon: '🧩', title: '엑셀 합치기·나누기', desc: '사업단별 파일 여러 개를 한 표로, 한 표를 사업단별 시트·파일로. 맨 위 제목 줄·머리글 이름이 조금 달라도 맞춰서.' },
     { id: 'xlclean', apps: ['xl'], icon: '🧹', title: '표 청소기', soon: true, desc: '합쳐진 칸 풀기, 빈 줄·중간 합계 줄 빼기, 숫자로 안 바뀐 숫자·날짜 고치기, 띄어쓰기 정리.' },
     { id: 'xlsum', apps: ['xl', 'hwp'], icon: '🧮', title: '피벗 없이 집계표', soon: true, desc: '「사업단별·월별 합계」처럼 기준만 고르면 집계표 — 그대로 한글 표로도.' },
     { id: 'xlchart', apps: ['xl', 'ppt'], icon: '📊', title: '엑셀 숫자 → PPT 차트', soon: true, desc: '표를 붙여 넣으면 고칠 수 있는 PowerPoint 차트 장표로.' },
