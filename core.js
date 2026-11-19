@@ -11,7 +11,6 @@
     { id: 'xlsum', when: '피벗 테이블은 어려운데 사업단별·월별 합계를 내야 할 때', apps: ['xl', 'hwp'], icon: '🧮', title: '피벗 없이 집계표', desc: '「사업단별·월별 합계」처럼 기준만 고르면 집계표 — 그대로 한글 표로도.' },
     { id: 'xlchart', when: '보고·발표에서 숫자를 표 대신 한눈에 보이는 차트로 보여 주고 싶을 때', apps: ['xl', 'ppt'], icon: '📊', title: '엑셀 숫자 → PPT 차트', desc: '표를 붙여 넣으면 고칠 수 있는 PowerPoint 차트 장표로.' },
     { ext: 'https://jahwalktg.github.io/jahwal-tools/excel/', when: '수식이 기억나지 않거나 #N/A 같은 오류가 날 때', apps: ['xl'], icon: '🔎', title: '엑셀 함수 도우미', site: '지역자활센터 업무 도구', desc: '하고 싶은 일로 함수 찾기 — VLOOKUP·SUMIF·나이 계산·주민번호→생년월일 등 34개와 오류 해결.' },
-    { ext: 'https://jahwalktg.github.io/jahwal-tools/forms/', when: '필요한 자활 서식을 찾느라 지침 PDF를 한참 뒤질 때', apps: ['hwp'], icon: '📄', title: '자활 서식 도우미', site: '지역자활센터 업무 도구', desc: '자활사업 안내 서식 71종을 한글 파일로 받고, 사람 정보를 넣어 채워 받기.' },
     { ext: 'https://jahwalktg.github.io/jahwal-motion/', when: '내일 발표인데 PPT를 어디서부터 시작할지 막막할 때', apps: ['ppt'], icon: '🎬', title: '발표 뼈대 · PPT 묶음', site: '즉석 모션그래픽', desc: '제목과 장 목록만 넣으면 표지~마무리 PPT 뼈대, 움직이는 장면을 골라 PPT 한 파일로.' },
     { ext: 'https://jahwalktg.github.io/jahwal-tools/shortcuts/', when: '마우스로 하던 반복 일을 조금 더 빨리 끝내고 싶을 때', apps: ['xl', 'hwp'], icon: '⌨️', title: '단축키 안내', site: '지역자활센터 업무 도구', desc: '엑셀·한글·윈도우 단축키를 하고 싶은 일로 찾고, 내 목록만 한 장으로 인쇄.' }
   ];

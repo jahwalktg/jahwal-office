@@ -81,7 +81,7 @@
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="../lib/hwpx.js?v=1"></script>
-<script src="../core.js?v=3"></script>
+<script src="../core.js?v=4"></script>
 <script>
 (function () {
   var O = Office, $ = O.$, esc = O.esc;
@@ -173,6 +173,28 @@
     return { rows: rows, merges: merges };
   }
 
+  /* ---------- 자동 알아보기: 머리 줄 수 · 원래 있던 합계 줄 ---------- */
+  var TOT_RE = /^(합계|총계|소계|누계|계|총합|합|총액|전체)$/;
+  function totKind(row) {   // 'sum'(합계·총계) / 'sub'(소계) / ''
+    for (var c = 0; c < row.length; c++) { var x = row[c]; if (x.covered || x.t === '') continue; var k = x.t.replace(/[\s()\[\]·:]/g, ''); return TOT_RE.test(k) ? (/^소계/.test(k) ? 'sub' : 'sum') : ''; }
+    return '';
+  }
+  function rowHasNum(row) { return row.some(function (x) { return !x.covered && x.n != null; }); }
+  function rowAllText(row) { var any = false; for (var i = 0; i < row.length; i++) { var x = row[i]; if (x.covered || x.t === '') continue; any = true; if (x.n != null) return false; } return any; }
+  function guessHead(m) {
+    var H = m.rows.length; if (H < 2) return 1;
+    if (!m.rows.some(rowHasNum)) return 1;
+    var h = 1, changed = true;
+    while (changed && h < 3 && h < H - 1) {
+      changed = false;
+      /* 머리 안에서 시작한 합친 칸이 아래 줄까지 내려오면 그 줄까지 머리 */
+      m.merges.forEach(function (g) { if (g.r < h && g.r + g.rs > h) { h = Math.min(3, g.r + g.rs); changed = true; } });
+      /* 머리 마지막 줄에 가로로 합친 칸(「참여기간」 위 칸 등)이 있고, 바로 아래 줄이 숫자 없는 글자 줄이면 그 줄도 머리 */
+      if (!changed && h < H - 1 && m.merges.some(function (g) { return g.r === h - 1 && g.cs > 1; }) && rowAllText(m.rows[h]) && rowHasNum(m.rows[h + 1] || [])) { h++; changed = true; }
+    }
+    return Math.max(1, Math.min(3, h));
+  }
+
   /* ---------- 설정 → 표 그리기 자료 ---------- */
   function opts() {
     return { title: $('title').value.trim(), titleSize: $('titleSize').value, unit: $('unit').value.trim(), headN: +$('headN').value, firstCol: $('firstCol').value,
@@ -185,6 +207,7 @@
     var o = opts(), m = o.trim ? trimModel(model) : model; if (!m) return null;
     var H = m.rows.length, W = m.rows[0].length, headN = Math.min(o.headN, H);
     var mergeAt = {}; m.merges.forEach(function (g) { mergeAt[g.r + ',' + g.c] = g; });
+    var totRow = {}; for (var rt = headN; rt < H; rt++) { var tk = totKind(m.rows[rt]); if (tk) totRow[rt] = tk; }
     /* 숫자 칸: 머리 아래에서 숫자가 절반 넘는 칸 */
     var numCol = [];
     for (var c = 0; c < W; c++) { var nn = 0, tt = 0; for (var r = headN; r < H; r++) { var x = m.rows[r][c]; if (x.covered || x.t === '') continue; tt++; if (x.n != null) nn++; } numCol[c] = tt > 0 && nn / tt > .5; }
@@ -195,10 +218,11 @@
       var row = [];
       for (var c4 = 0; c4 < W; c4++) {
         var z = m.rows[r4][c4]; if (z.covered) continue;
-        var head = r4 < headN, g = mergeAt[r4 + ',' + c4], first = c4 === 0 && o.firstCol === 'gray' && !head;
+        var head = r4 < headN, tot = !head && totRow[r4], g = mergeAt[r4 + ',' + c4], first = c4 === 0 && o.firstCol === 'gray' && !head;
         var cell = { t: text(z, c4), style: head || first ? 'label' : o.size };
         if (head || first) { cell.gray = true; cell.align = 'center'; }
         else cell.align = (z.n != null && o.comma && numCol[c4]) ? 'right' : o.align;
+        if (tot) { cell.gray = true; cell.style = 'label'; if (z.n == null) cell.align = 'center'; }
         if (g) { if (g.cs > 1) cell.cs = g.cs; if (g.rs > 1) cell.rs = g.rs; }
         row.push(cell);
       }
@@ -208,7 +232,7 @@
       var sr = [{ t: '합계', gray: true, align: 'center', style: 'label' }], any = false;
       for (var c5 = 1; c5 < W; c5++) {
         if (!numCol[c5]) { sr.push({ t: '', style: o.size, sum: true }); continue; }
-        var s = 0; for (var r5 = headN; r5 < H; r5++) { var q = m.rows[r5][c5]; if (q.n != null && !q.covered) s += q.n; }
+        var s = 0; for (var r5 = headN; r5 < H; r5++) { if (totRow[r5]) continue; var q = m.rows[r5][c5]; if (q.n != null && !q.covered) s += q.n; }
         any = true; sr.push({ t: fmt(Math.round(s * Math.pow(10, dec[c5])) / Math.pow(10, dec[c5]), o.comma ? dec[c5] : dec[c5]), align: 'right', style: 'label', sum: true });
       }
       if (any && W > 1) { if (!o.comma) sr.forEach(function (x) { if (x.sum && x.t) x.t = x.t.replace(/,/g, ''); }); out.push(sr); }
@@ -223,7 +247,7 @@
     }
     var tw = weights.reduce(function (a, b) { return a + b; }, 0);
     var widths = weights.map(function (w) { return Math.round(w / tw * o.bodyW * 10) / 10; });
-    return { o: o, rows: out, widths: widths, H: out.length, W: W };
+    return { o: o, rows: out, widths: widths, H: out.length, W: W, tots: Object.keys(totRow).length };
   }
   function blocks(b) {
     var bl = [];
@@ -270,11 +294,17 @@
     /* 표 바로 위가 아니라 표 첫 줄 오른쪽 끝에만 「(단위…)」가 있는 경우도 */
     m.lifted = lifted; return m;
   }
+  var keepSum = false, autoSum = false;   // 예시 단추는 합계 넣기를 켠 채로 시작
   function setModel(m, msg) {
     m = liftTitle(m); model = m;
     var inf = $('info');
     if (!m) { inf.className = 'info'; inf.textContent = msg || '표를 읽지 못했습니다. 엑셀에서 칸을 골라 복사했는지 확인해 주세요.'; render(); return; }
-    inf.className = 'info ok'; inf.textContent = (msg || '') + '✓ ' + m.rows.length + '줄 × ' + m.rows[0].length + '칸' + (m.merges.length ? ' · 합친 칸 ' + m.merges.length + '곳 살림' : '') + (m.lifted && m.lifted.length ? ' · 맨 위 ' + m.lifted.join('·') + ' 줄은 ' + m.lifted.join('·') + ' 칸으로 옮김' : '');
+    var mm = $('trim').checked ? (trimModel(m) || m) : m, hn = guessHead(mm), hasSum = false, hasSub = false;
+    for (var r = hn; r < mm.rows.length; r++) { var tk = totKind(mm.rows[r]); if (tk === 'sum') hasSum = true; if (tk === 'sub') hasSub = true; }
+    $('headN').value = String(hn);
+    if (!keepSum) $('sum').checked = !hasSum && autoSum;
+    var auto = ' · 자동: 머리 ' + hn + '줄' + (hasSum ? ' · 원래 합계 줄 있음(회색으로, 새 합계 안 넣음)' : '') + (hasSub ? ' · 소계 줄 회색' : '');
+    inf.className = 'info ok'; inf.textContent = (msg || '') + '✓ ' + m.rows.length + '줄 × ' + m.rows[0].length + '칸' + auto.replace(/^ · /, ' · ') + (m.merges.length ? ' · 합친 칸 ' + m.merges.length + '곳 살림' : '') + (m.lifted && m.lifted.length ? ' · 맨 위 ' + m.lifted.join('·') + ' 줄은 ' + m.lifted.join('·') + ' 칸으로 옮김' : '');
     render();
   }
   /* ---------- 입력 연결 ---------- */
@@ -298,13 +328,14 @@
       loadSheet();
     });
   });
+  $('sum').addEventListener('change', function () { keepSum = true; });
   $('sheet').onchange = loadSheet; $('range').onchange = loadSheet;
   $('land').onchange = function () { var w = +$('bodyW').value; if (this.value && w === 170) $('bodyW').value = 257; if (!this.value && w === 257) $('bodyW').value = 170; render(); };
   ['title', 'titleSize', 'unit', 'headN', 'firstCol', 'align', 'size', 'bodyW', 'widthMode', 'rowH', 'comma', 'sum', 'trim'].forEach(function (id) { $(id).addEventListener('input', render); $(id).addEventListener('change', render); });
   $('sample').onclick = function () {
     $('paste').value = '사업단\t9월 매출\t10월 매출\t증감\t비고\n청소마스터\t12,480,000\t13,120,500\t640,500\t\n샐러드박스\t8,215,300\t7,990,000\t-225,300\t휴무 2일\n세차\t5,600,000\t6,050,000\t450,000\t\n편의점\t31,402,880\t32,115,400\t712,520\t2개 점포';
-    $('title').value = '2026년 사업단별 매출 현황(예시)'; $('unit').value = '(단위: 원)'; $('sum').checked = true; fileName = ''; $('sheetRow').hidden = true;
-    setModel(fromText($('paste').value), '예시 표 ');
+    $('title').value = '2026년 사업단별 매출 현황(예시)'; $('unit').value = '(단위: 원)'; fileName = ''; $('sheetRow').hidden = true;
+    autoSum = true; setModel(fromText($('paste').value), '예시 표 '); autoSum = false;
   };
   /* ---------- 받기 ---------- */
   $('dlHwp').onclick = function () {
