@@ -7,9 +7,9 @@
     { id: 'album', apps: ['ppt'], icon: '🖼️', title: '사진 앨범 PPT', desc: '행사 사진 폴더를 넣으면 찍은 순서대로 한 장에 1~9장씩 배치한 PPT. 사진 크기를 줄여 파일도 가볍게.' },
     { id: 'pptslim', apps: ['ppt'], icon: '🪶', title: 'PPT 용량 줄이기', desc: '메일로 안 보내지는 무거운 PPT — 안에 든 큰 사진만 줄여서 다시 묶습니다. 글·도형·애니메이션은 그대로.' },
     { id: 'xlmerge', apps: ['xl'], icon: '🧩', title: '엑셀 합치기·나누기', desc: '사업단별 파일 여러 개를 한 표로, 한 표를 사업단별 시트·파일로. 맨 위 제목 줄·머리글 이름이 조금 달라도 맞춰서.' },
-    { id: 'xlclean', apps: ['xl'], icon: '🧹', title: '표 청소기', soon: true, desc: '합쳐진 칸 풀기, 빈 줄·중간 합계 줄 빼기, 숫자로 안 바뀐 숫자·날짜 고치기, 띄어쓰기 정리.' },
-    { id: 'xlsum', apps: ['xl', 'hwp'], icon: '🧮', title: '피벗 없이 집계표', soon: true, desc: '「사업단별·월별 합계」처럼 기준만 고르면 집계표 — 그대로 한글 표로도.' },
-    { id: 'xlchart', apps: ['xl', 'ppt'], icon: '📊', title: '엑셀 숫자 → PPT 차트', soon: true, desc: '표를 붙여 넣으면 고칠 수 있는 PowerPoint 차트 장표로.' },
+    { id: 'xlclean', apps: ['xl'], icon: '🧹', title: '표 청소기', desc: '합쳐진 칸 풀기, 빈 줄·중간 합계 줄 빼기, 숫자로 안 바뀐 숫자·날짜 고치기, 띄어쓰기 정리.' },
+    { id: 'xlsum', apps: ['xl', 'hwp'], icon: '🧮', title: '피벗 없이 집계표', desc: '「사업단별·월별 합계」처럼 기준만 고르면 집계표 — 그대로 한글 표로도.' },
+    { id: 'xlchart', apps: ['xl', 'ppt'], icon: '📊', title: '엑셀 숫자 → PPT 차트', desc: '표를 붙여 넣으면 고칠 수 있는 PowerPoint 차트 장표로.' },
     { ext: 'https://jahwalktg.github.io/jahwal-tools/excel/', apps: ['xl'], icon: '🔎', title: '엑셀 함수 도우미', site: '지역자활센터 업무 도구', desc: '하고 싶은 일로 함수 찾기 — VLOOKUP·SUMIF·나이 계산·주민번호→생년월일 등 34개와 오류 해결.' },
     { ext: 'https://jahwalktg.github.io/jahwal-tools/forms/', apps: ['hwp'], icon: '📄', title: '자활 서식 도우미', site: '지역자활센터 업무 도구', desc: '자활사업 안내 서식 71종을 한글 파일로 받고, 사람 정보를 넣어 채워 받기.' },
     { ext: 'https://jahwalktg.github.io/jahwal-motion/', apps: ['ppt'], icon: '🎬', title: '발표 뼈대 · PPT 묶음', site: '즉석 모션그래픽', desc: '제목과 장 목록만 넣으면 표지~마무리 PPT 뼈대, 움직이는 장면을 골라 PPT 한 파일로.' },
@@ -22,9 +22,9 @@
   function download(name, data, mime) {
     var ext = (name.split('.').pop() || '').toLowerCase();
     var blob = data instanceof Blob ? data : new Blob([data], { type: mime || MIME[ext] || 'application/octet-stream' });
+    if (window._onDownload) { try { if (window._onDownload(name, blob) === true) return; } catch (e) { } }   // 시험용 입구: true를 돌려주면 저장 창 없이 확인용으로만
     var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click();
     setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
-    if (window._onDownload) try { window._onDownload(name, blob); } catch (e) { }   // 시험용 입구
   }
   var tt = 0;
   function toast(msg, ms) { var t = $('toast'); if (!t) { t = document.createElement('div'); t.id = 'toast'; t.className = 'toast'; t.setAttribute('role', 'status'); document.body.appendChild(t); } t.textContent = msg; t.hidden = false; clearTimeout(tt); tt = setTimeout(function () { t.hidden = true; }, ms || 2600); }
