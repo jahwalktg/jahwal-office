@@ -7,7 +7,7 @@ const require = createRequire(path.join(kd, 'package.json'));
 const esbuild = require('esbuild');
 const SH = (f) => path.join(here, 'shim', f);
 const BUILTIN = /^(node:)?(fs|fs\/promises|path|os|child_process|url|crypto|stream|stream\/promises|events|worker_threads|http|https|net|tls|readline|assert|v8|perf_hooks|async_hooks|process|tty|string_decoder|querystring|dns|cluster|vm)$/;
-const HEAVY = /^(sharp|onnxruntime-node|onnxruntime-web|@napi-rs\/canvas|canvas|tesseract\.js|pdfjs-dist.*|@rhwp\/core|@modelcontextprotocol\/.*|commander|zod|markdown-it)$/;
+const HEAVY = /^(sharp|onnxruntime-node|onnxruntime-web|@napi-rs\/canvas|canvas|tesseract\.js|pdfjs-dist.*|@rhwp\/core|@modelcontextprotocol\/.*|commander|zod|markdown-it|@hyzyla\/pdfium.*|@huggingface\/tokenizers.*|zxing-wasm.*)$/;
 const used = new Set();
 const plugin = {
   name: 'browser-shims',
@@ -18,11 +18,19 @@ const plugin = {
     b.onResolve({ filter: /^(node:)?buffer$/ }, () => ({ path: require.resolve('buffer/') }));
     b.onResolve({ filter: BUILTIN }, (a) => { used.add(a.path); return { path: SH('empty.cjs') }; });
     b.onResolve({ filter: HEAVY }, (a) => { used.add(a.path); return { path: SH('empty.cjs') }; });
+    /* hwpx·xlsx zip 읽기: jszip nodeStream(브라우저 미지원) → async('uint8array') 한 번에 (크기 한도 검사는 그대로 data 콜백에서) */
+    const NS = 'const stream = file.nodeStream("nodebuffer");';
+    const NS2 = 'const stream = (() => { const h = {}; const s = { on(e, f) { h[e] = f; return s; }, pause() {} }; file.async("uint8array").then((u) => { h.data && h.data(Buffer.from(u)); h.end && h.end(); }, (e) => { h.error && h.error(e); }); return s; })();';
+    b.onLoad({ filter: /kordoc[\\/]dist[\\/].*\.js$/ }, async (a) => {
+      const fs = await import('fs'); let src = fs.readFileSync(a.path, 'utf8');
+      if (src.includes(NS)) { src = src.split(NS).join(NS2); used.add('nodeStream 패치 ' + a.path.split(/[\\/]/).pop()); }
+      return { contents: src, loader: 'js', resolveDir: path.dirname(a.path) };
+    });
   }
 };
 const r = await esbuild.build({
-  entryPoints: [path.join(here, 'entry.js')], bundle: true, format: 'iife', platform: 'browser', target: 'es2020', minify: true,
-  outfile: path.join(here, 'kordoc-conv.js'), nodePaths: [path.join(kd, 'node_modules')], mainFields: ['browser', 'module', 'main'],
+  entryPoints: [path.join(here, process.argv[2] || 'entry.js')], bundle: true, format: 'iife', platform: 'browser', target: 'es2020', minify: true,
+  outfile: path.join(here, process.argv[3] || 'kordoc-conv.js'), nodePaths: [path.join(kd, 'node_modules')], mainFields: ['browser', 'module', 'main'],
   define: { 'import.meta.url': '"file:///kordoc.js"', 'process.env.NODE_ENV': '"production"' },
   inject: [path.join(here, 'shim', 'inject.js')], plugins: [plugin], metafile: true, logLevel: 'error',
   banner: { js: '/* kordoc ' + require(path.join(kd, 'node_modules/kordoc/package.json')).version + ' (MIT, chrisryugj/kordoc) — HWP→HWPX 변환만 브라우저용으로 묶음. 대체: zlib→pako, Buffer→buffer */' }

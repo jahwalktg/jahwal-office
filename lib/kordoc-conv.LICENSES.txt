@@ -1,4 +1,4 @@
-lib/kordoc-conv.js 에 묶인 공개 프로그램과 라이선스
+lib/kordoc-conv.js(HWP→HWPX 바꾸기)와 lib/kordoc-read.js(AI에 붙일 글 꺼내기)에 묶인 공개 프로그램과 라이선스
 (HWP→HWPX 변환만 브라우저에서 쓰도록 esbuild로 묶음. 원본: https://github.com/chrisryugj/kordoc — Node 전용 부분은 대체 조각으로 바꿈)
 
 ==== kordoc 4.25.1 · MIT ====
